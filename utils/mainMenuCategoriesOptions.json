@@ -1,0 +1,21 @@
+[
+    {
+        "generalCategory" : "Tecnología",
+        "specificCategory": "Celulares",
+        "orderByOption"   : [
+            {   "label": "Menor precio",
+                "value": "LOWEST_SALE_PRICE" }
+        ],
+        "toogleOption"    : [
+            {
+                "label": "Envío gratis",
+                "value": "FREE_COST"
+            }
+        ]
+    }
+
+
+]
+
+
+

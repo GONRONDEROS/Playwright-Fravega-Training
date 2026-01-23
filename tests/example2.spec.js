@@ -1,49 +1,61 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
+const {MainMenuBar} = require('../pageobjects/MainMenuBar');
+const {ProductPage} = require('../pageobjects/ProductPage');
+const dataset = JSON.parse(JSON.stringify(require('../utils/mainMenuCategoriesOptions.json')));
 
 /**
  * @type {import("playwright-core").Page}
  */
-let page;
 
-test.beforeAll(async({browser})=>{
-  const context = await browser.newContext();
-  page = await context.newPage();
-
-});
-
-
-test('Verify placing and order', async () => {
+for(const data of dataset){
+test('Verify placing and order', async ({browser}) => {
+  const context = await browser.newContext(
+    {
+      permissions : ['geolocation']
+    }
+  );
+  const page = await context.newPage()
   await page.goto("https://www.fravega.com/");
-  await Promise.all([
-    page.locator("ul.dXuxpr > li.erbUBo > div.cbwmbG > a > span.brTaXr:has-text('Celulares')").click(),
-    page.waitForURL("**/celulares/**")
-  ]);
   const locationModalCloseButton = await page.locator(".jWJPFh");
   if(await locationModalCloseButton.isVisible()){
     await locationModalCloseButton.click();
   };
-  await Promise.all([
-    page.locator("div.cgAxxT > label.kcAyqR:has-text('Samsung')").click(),
-    page.waitForURL("**/?marcas=samsung")  
-  ]);
-  const checkboxCuotas = await page.locator("div.cFwhSX:has(div.fsNAZr:has-text('Cuotas sin interés')) a.hTZzZP > label.jIkFVx");
-  await Promise.all([
-    checkboxCuotas.click(),
-    page.waitForURL(/formas-de-pago=12-cuotas-sin-interes/)
-  ]);
-  expect(await checkboxCuotas.isChecked()).toBeTruthy();
-  const checkboxApple = await page.locator("[id*='brand-filter-checkbox-apple-Apple']");
-  await Promise.all([
-    checkboxApple.click(),
-    page.waitForURL(/apple/)
-  ]);
-  const orderButton = await page.locator("button.bVvgMq");
-  await orderButton.click();
-  await Promise.all([
-    page.locator("a.jVZMfP:has-text('Mayor descuento')").click(),
-    page.waitForURL(/HIGHEST_DISCOUNT/)
-  ]);
+  const mainMenuBar = new MainMenuBar(page);
+  await mainMenuBar.hoverCategoryMenu();
+  await mainMenuBar.selectGeneralCategory(data.generalCategory);
+  await mainMenuBar.selectAndNavigateToSpecificCategoty(data.specificCategory);
+  await expect(page.url()).toContain(data.specificCategory.toLowerCase());
+  const productPage = new ProductPage(page);
+  for(const option of data.orderByOption){
+  await productPage.selectOrderOption(option.label, option.value);
+  await expect(page.url()).toContain(option.value.toUpperCase());
+  };
+  for(const option of data.toogleOption){
+  await productPage.toogleOption(option.label, option.value);
+  await expect(page.url()).toContain(option.value);
+  };
+  // await Promise.all([
+  //   page.locator("div.cgAxxT > label.kcAyqR:has-text('Samsung')").click(),
+  //   page.waitForURL("**/?marcas=samsung")  
+  // ]);
+  // const checkboxCuotas = await page.locator("div.cFwhSX:has(div.fsNAZr:has-text('Cuotas sin interés')) a.hTZzZP > label.jIkFVx");
+  // await Promise.all([
+  //   checkboxCuotas.click(),
+  //   page.waitForURL(/formas-de-pago=12-cuotas-sin-interes/)
+  // ]);
+  // expect(await checkboxCuotas.isChecked()).toBeTruthy();
+  // const checkboxApple = await page.locator("[id*='brand-filter-checkbox-apple-Apple']");
+  // await Promise.all([
+  //   checkboxApple.click(),
+  //   page.waitForURL(/apple/)
+  // ]);
+  // const orderButton = await page.locator("button.bVvgMq");
+  // await orderButton.click();
+  // await Promise.all([
+  //   page.locator("a.jVZMfP:has-text('Mayor descuento')").click(),
+  //   page.waitForURL(/HIGHEST_DISCOUNT/)
+  // ]);
   const selectableArticles = await page.locator("ul.peNi > li > article.bwMsmt");
   await expect(selectableArticles.first()).toBeVisible();
   const articleToSelect = await page.locator(".kUaLHc").first();
@@ -81,3 +93,4 @@ test('Verify placing and order', async () => {
     }
   }
 });
+}
