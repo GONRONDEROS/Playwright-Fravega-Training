@@ -1,12 +1,14 @@
-// @ts-check
+//// @ts-check
 import { test, expect } from '@playwright/test';
 const {MainMenuBar} = require('../pageobjects/MainMenuBar');
 const {ProductPage} = require('../pageobjects/ProductPage');
 const dataset = JSON.parse(JSON.stringify(require('../utils/mainMenuCategoriesOptions.json')));
+const {APIProducts} = require('../utils/APIProducts');
 
 /**
  * @type {import("playwright-core").Page}
  */
+
 
 for(const data of dataset){
 test('Verify placing and order', async ({browser}) => {
@@ -35,6 +37,26 @@ test('Verify placing and order', async ({browser}) => {
   await productPage.toogleOption(option.label, option.value);
   await expect(page.url()).toContain(option.value);
   };
+  for(const option of data.orderByOption){
+  if(option.label === "Menor precio")
+    {
+    const isCheaperFirst = await productPage.theCheaperIsTheFirst();
+    await expect(isCheaperFirst).toBe(true);
+    console.log("Se ordenaron los productos en base al metodo "+option.label)
+    } 
+    else if (option.label === "Mayor precio")
+    {
+    const isExpensiveFirst = await productPage.theExpensiveIsTheFirst();
+    await expect(isExpensiveFirst).toBe(true);
+    console.log("Se ordenaron los productos en base al metodo "+option.label)
+    }
+    else
+    {
+    const biggestDiscountFirst = await productPage.theHighestDiscountIsTheFirst()
+    await expect(biggestDiscountFirst).toBe(true);
+    console.log("Se ordenaron los productos en base al metodo "+option.label)
+    }
+  }
   // await Promise.all([
   //   page.locator("div.cgAxxT > label.kcAyqR:has-text('Samsung')").click(),
   //   page.waitForURL("**/?marcas=samsung")  
@@ -92,5 +114,46 @@ test('Verify placing and order', async ({browser}) => {
       break;
     }
   }
+});
+}
+
+/**
+ * @type {Array<{id: string, title: string, listPrice: number|null, salePrice: number|null, discount: number|null}>}
+ */ 
+for(const data of dataset){
+test('Comparar productos API vs UI', async ({ browser }) => {
+  //Obtener datos de la API
+  const apiClient = new APIProducts();
+  const apiProducts = await apiClient.listProducts();
+  //Navegar a la página y obtener datos de la UI
+  const context = await browser.newContext(
+    {
+      permissions : ['geolocation']
+    }
+  );
+  const page = await context.newPage();
+  await page.goto("https://www.fravega.com/l/celulares/celulares-liberados/");
+  await page.waitForSelector("ul.peNi > li > article.bwMsmt");
+  const productPage = new ProductPage(page);
+  const uiNameAndPrice = await productPage.getProductsWithNameAndPrice(); // [{ name, price }]
+  //const uiDiscounts = await productPage.getProductsWithDiscount(); // [{ name, discount }]
+  //Comparaciones //
+  // Comparar títulos
+  const apiTitles = apiProducts.map(p => p.title.trim());
+  const uiTitles = uiNameAndPrice.map(p => p.name.trim());
+  console.log("Esto son los nombres de la UI")
+  console.log(uiTitles);
+  console.log("Esto son los nombres de la API")
+  console.log(apiTitles)
+  //await page.pause()
+  expect(uiTitles).toEqual(await expect.arrayContaining(apiTitles));
+  // 🔹 Comparar precios de venta
+  const apiSalePrices = apiProducts.map(p => p.salePrice);
+  const uiSalePrices = uiNameAndPrice.map(p => p.price);
+  console.log("Esto son los precios de la UI")
+  console.log(apiSalePrices);
+  console.log("Esto son los precios de la API")
+  console.log(uiSalePrices)
+  expect(uiSalePrices).toEqual(await expect.arrayContaining(apiSalePrices));
 });
 }

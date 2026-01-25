@@ -3,8 +3,8 @@
         "generalCategory" : "Tecnología",
         "specificCategory": "Celulares",
         "orderByOption"   : [
-            {   "label": "Menor precio",
-                "value": "LOWEST_SALE_PRICE" }
+            {   "label": "Mayor descuento",
+                "value": "DISCOUNT" }
         ],
         "toogleOption"    : [
             {
@@ -16,6 +16,5 @@
 
 
 ]
-
 
 
