@@ -1,7 +1,6 @@
 //// @ts-check
 import { test, expect } from '@playwright/test';
-const {MainMenuBar} = require('../pageobjects/MainMenuBar');
-const {ProductPage} = require('../pageobjects/ProductPage');
+const {POManager} = require('../pageobjects/POManager');
 const dataset = JSON.parse(JSON.stringify(require('../utils/mainMenuCategoriesOptions.json')));
 const {APIProducts} = require('../utils/APIProducts');
 
@@ -11,106 +10,70 @@ const {APIProducts} = require('../utils/APIProducts');
 
 
 for(const data of dataset){
-test('Verify placing and order', async ({browser}) => {
+test(`Verify placing and order - "${data.generalCategory}", "${data.orderByOption[0].label}", "${data.toogleOption[0].label}"`, async ({browser}) => {
   const context = await browser.newContext(
     {
       permissions : ['geolocation']
     }
   );
-  const page = await context.newPage()
+  const page = await context.newPage();
+  const poManager = new POManager(page);
+  const mainMenuBar = poManager.getMainMenuBar();
+  const productPage = poManager.getProductPage();
+
   await page.goto("https://www.fravega.com/");
-  const locationModalCloseButton = await page.locator(".jWJPFh");
-  if(await locationModalCloseButton.isVisible()){
-    await locationModalCloseButton.click();
-  };
-  const mainMenuBar = new MainMenuBar(page);
+  await productPage.getRidOfDirectionModal();
   //Seleccion de Categoria en el Dropdown del Menu Principal
   await mainMenuBar.hoverCategoryMenu();
   await mainMenuBar.selectGeneralCategory(data.generalCategory);
   await mainMenuBar.selectAndNavigateToSpecificCategoty(data.specificCategory);
-  await expect(page.url()).toContain(data.specificCategory.toLowerCase());
-  const productPage = new ProductPage(page);
+  expect(page.url()).toContain(data.specificCategory.toLowerCase());
+  //Seleccion de Ordenamiento de Productos
   for(const option of data.orderByOption){
-  await productPage.selectOrderOption(option.label, option.value);
-  await expect(page.url()).toContain(option.value.toUpperCase());
+    await productPage.selectOrderOption(option.label, option.value);
+    expect(page.url()).toContain(option.value.toUpperCase());
   };
+  //Seleccion de filtros de productos
   for(const option of data.toogleOption){
-  await productPage.toogleOption(option.label, option.value);
-  await expect(page.url()).toContain(option.value);
+    await productPage.toogleOption(option.label, option.value);
+    expect(page.url()).toContain(option.value);
   };
+  //Verificacion de Ordenamiento de Productos
   for(const option of data.orderByOption){
   if(option.label === "Menor precio")
     {
     const isCheaperFirst = await productPage.theCheaperIsTheFirst();
-    await expect(isCheaperFirst).toBe(true);
+    expect(isCheaperFirst).toBe(true);
     console.log("Se ordenaron los productos en base al metodo "+option.label)
     } 
     else if (option.label === "Mayor precio")
     {
     const isExpensiveFirst = await productPage.theExpensiveIsTheFirst();
-    await expect(isExpensiveFirst).toBe(true);
+    expect(isExpensiveFirst).toBe(true);
     console.log("Se ordenaron los productos en base al metodo "+option.label)
     }
     else
     {
     const biggestDiscountFirst = await productPage.theHighestDiscountIsTheFirst()
-    await expect(biggestDiscountFirst).toBe(true);
+    expect(biggestDiscountFirst).toBe(true);
     console.log("Se ordenaron los productos en base al metodo "+option.label)
     }
   }
-  // await Promise.all([
-  //   page.locator("div.cgAxxT > label.kcAyqR:has-text('Samsung')").click(),
-  //   page.waitForURL("**/?marcas=samsung")  
-  // ]);
-  // const checkboxCuotas = await page.locator("div.cFwhSX:has(div.fsNAZr:has-text('Cuotas sin interés')) a.hTZzZP > label.jIkFVx");
-  // await Promise.all([
-  //   checkboxCuotas.click(),
-  //   page.waitForURL(/formas-de-pago=12-cuotas-sin-interes/)
-  // ]);
-  // expect(await checkboxCuotas.isChecked()).toBeTruthy();
-  // const checkboxApple = await page.locator("[id*='brand-filter-checkbox-apple-Apple']");
-  // await Promise.all([
-  //   checkboxApple.click(),
-  //   page.waitForURL(/apple/)
-  // ]);
-  // const orderButton = await page.locator("button.bVvgMq");
-  // await orderButton.click();
-  // await Promise.all([
-  //   page.locator("a.jVZMfP:has-text('Mayor descuento')").click(),
-  //   page.waitForURL(/HIGHEST_DISCOUNT/)
-  // ]);
-  const selectableArticles = await page.locator("ul.peNi > li > article.bwMsmt");
-  await expect(selectableArticles.first()).toBeVisible();
-  const articleToSelect = await page.locator(".kUaLHc").first();
-  const nameOfArticleToSelect = await articleToSelect.textContent();
-  console.log("El producto a seleccionar es: " + nameOfArticleToSelect);
-  await Promise.all([
-    articleToSelect.click(),
-    page.waitForURL(/p/)
-  ]);
-  const selectedArticle = await page.locator("h1[data-test-id='product-title']").first().textContent();
-  console.log("El producto seleccionado es: " + selectedArticle);
-  if(selectedArticle?.trim() === nameOfArticleToSelect?.trim()){
-    await page.getByRole('button', { name: 'Agregar al carrito' }).first().click();
-    //await page.pause()
-  };
-  await page.waitForSelector(".Toastify__toast-body", { state: "visible" });
-  const nombreAGuardar = await page.locator("div.Toastify__toast-body > div > div.iGnvSC > div.llUDMb > p").first().textContent(); 
-  console.log("El producto en el pre carro es: " + nombreAGuardar);
-  const esteBotonDelCarrito = await page.locator("div.Toastify__toast-body >> text=Ver carrito");
-  await expect(esteBotonDelCarrito).toBeVisible();
-  await Promise.all([
-    esteBotonDelCarrito.click(),
-    page.waitForURL("**/chk-ui-headless")
-  ]);   
+  //Seleccionamos al azar in producto de la pagina
+  const nameOfArticleSelected = (await productPage.clickTheRandomProduct()).trim();
+  console.log("El producto seleccionado es: " + nameOfArticleSelected);
+  await page.waitForURL(/p/);
+  expect(await productPage.verifySelectedArticleEqualsToArticleToBuy(nameOfArticleSelected)).toBeTruthy();
+  await productPage.addProductToCart();
+  await productPage.proceedToCartPage();
+  await page.waitForURL("**/chk-ui-headless");
   await page.waitForSelector("div.bqsZAS");
   const elementsInCart = await page.locator("div.bqsZAS").count();
   console.log("La cantidad de elementos en el carrito es: " + elementsInCart);
   for(let i = 0; i < elementsInCart; i++){
     let elementInCartDescription = await page.locator("div.CEnZU").nth(i).textContent();
     let elementCurated = elementInCartDescription?.trim()
-    console.log(elementCurated);
-    if(elementCurated === selectedArticle){
+    if(elementCurated === nameOfArticleSelected){
       await page.locator("#endPurchaseCart").click();
       break;
     }
@@ -133,9 +96,10 @@ test('Comparar productos API vs UI', async ({ browser }) => {
     }
   );
   const page = await context.newPage();
+  const poManager = new POManager(page);
+  const productPage = poManager.getProductPage();
   await page.goto("https://www.fravega.com/l/celulares/celulares-liberados/");
   await page.waitForSelector("ul.peNi > li > article.bwMsmt");
-  const productPage = new ProductPage(page);
   const uiNameAndPrice = await productPage.getProductsWithNameAndPrice(); // [{ name, price }]
   //const uiDiscounts = await productPage.getProductsWithDiscount(); // [{ name, discount }]
   //Comparaciones //
@@ -158,3 +122,27 @@ test('Comparar productos API vs UI', async ({ browser }) => {
   expect(uiSalePrices).toEqual(await expect.arrayContaining(apiSalePrices));
 });
 }
+
+
+
+// await Promise.all([
+  //   page.locator("div.cgAxxT > label.kcAyqR:has-text('Samsung')").click(),
+  //   page.waitForURL("**/?marcas=samsung")  
+  // ]);
+  // const checkboxCuotas = await page.locator("div.cFwhSX:has(div.fsNAZr:has-text('Cuotas sin interés')) a.hTZzZP > label.jIkFVx");
+  // await Promise.all([
+  //   checkboxCuotas.click(),
+  //   page.waitForURL(/formas-de-pago=12-cuotas-sin-interes/)
+  // ]);
+  // expect(await checkboxCuotas.isChecked()).toBeTruthy();
+  // const checkboxApple = await page.locator("[id*='brand-filter-checkbox-apple-Apple']");
+  // await Promise.all([
+  //   checkboxApple.click(),
+  //   page.waitForURL(/apple/)
+  // ]);
+  // const orderButton = await page.locator("button.bVvgMq");
+  // await orderButton.click();
+  // await Promise.all([
+  //   page.locator("a.jVZMfP:has-text('Mayor descuento')").click(),
+  //   page.waitForURL(/HIGHEST_DISCOUNT/)
+  // ]);
