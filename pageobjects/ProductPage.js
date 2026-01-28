@@ -60,7 +60,7 @@ class ProductPage{
         return true;
     }
 
-    // 1️⃣ Método: obtener solo los precios con el nombre de cada producto
+    // Método: obtener solo los precios con el nombre de cada producto
     async getProductPrices() {
         const count = await this.productsLocator.count();
         const products = [];

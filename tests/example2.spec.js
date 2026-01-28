@@ -24,6 +24,7 @@ test('Verify placing and order', async ({browser}) => {
     await locationModalCloseButton.click();
   };
   const mainMenuBar = new MainMenuBar(page);
+  //Seleccion de Categoria en el Dropdown del Menu Principal
   await mainMenuBar.hoverCategoryMenu();
   await mainMenuBar.selectGeneralCategory(data.generalCategory);
   await mainMenuBar.selectAndNavigateToSpecificCategoty(data.specificCategory);
@@ -147,7 +148,7 @@ test('Comparar productos API vs UI', async ({ browser }) => {
   console.log(apiTitles)
   //await page.pause()
   expect(uiTitles).toEqual(await expect.arrayContaining(apiTitles));
-  // 🔹 Comparar precios de venta
+  // Comparar precios de venta
   const apiSalePrices = apiProducts.map(p => p.salePrice);
   const uiSalePrices = uiNameAndPrice.map(p => p.price);
   console.log("Esto son los precios de la UI")

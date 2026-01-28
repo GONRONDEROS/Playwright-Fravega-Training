@@ -1,4 +1,4 @@
-// utils/ApiClient.js
+// utils/APIProducts.js
 const { request } = require('@playwright/test');
 
 class APIProducts {
