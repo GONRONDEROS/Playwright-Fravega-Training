@@ -125,24 +125,3 @@ test('Comparar productos API vs UI', async ({ browser }) => {
 
 
 
-// await Promise.all([
-  //   page.locator("div.cgAxxT > label.kcAyqR:has-text('Samsung')").click(),
-  //   page.waitForURL("**/?marcas=samsung")  
-  // ]);
-  // const checkboxCuotas = await page.locator("div.cFwhSX:has(div.fsNAZr:has-text('Cuotas sin interés')) a.hTZzZP > label.jIkFVx");
-  // await Promise.all([
-  //   checkboxCuotas.click(),
-  //   page.waitForURL(/formas-de-pago=12-cuotas-sin-interes/)
-  // ]);
-  // expect(await checkboxCuotas.isChecked()).toBeTruthy();
-  // const checkboxApple = await page.locator("[id*='brand-filter-checkbox-apple-Apple']");
-  // await Promise.all([
-  //   checkboxApple.click(),
-  //   page.waitForURL(/apple/)
-  // ]);
-  // const orderButton = await page.locator("button.bVvgMq");
-  // await orderButton.click();
-  // await Promise.all([
-  //   page.locator("a.jVZMfP:has-text('Mayor descuento')").click(),
-  //   page.waitForURL(/HIGHEST_DISCOUNT/)
-  // ]);
