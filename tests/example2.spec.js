@@ -111,7 +111,7 @@ test('Comparar productos API vs UI', async ({ browser }) => {
   console.log("Esto son los nombres de la API")
   console.log(apiTitles)
   //await page.pause()
-  expect(uiTitles).toEqual(await expect.arrayContaining(apiTitles));
+  expect(uiTitles).toEqual(apiTitles);
   // Comparar precios de venta
   const apiSalePrices = apiProducts.map(p => p.salePrice);
   const uiSalePrices = uiNameAndPrice.map(p => p.price);
@@ -119,7 +119,8 @@ test('Comparar productos API vs UI', async ({ browser }) => {
   console.log(apiSalePrices);
   console.log("Esto son los precios de la API")
   console.log(uiSalePrices)
-  expect(uiSalePrices).toEqual(await expect.arrayContaining(apiSalePrices));
+  expect(uiSalePrices).toEqual(apiSalePrices);
+  
 });
 }
 
