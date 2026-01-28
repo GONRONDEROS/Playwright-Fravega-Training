@@ -26,7 +26,7 @@ export default defineConfig({
     //trace: 'on-first-retry',
   },
   fullyParallel: true,
-  workers: 2,
+  workers: 2
 
 });
 
