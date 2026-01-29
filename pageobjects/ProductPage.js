@@ -16,6 +16,10 @@ class ProductPage{
         this.cartButton = page.getByRole('button', { name: 'Agregar al carrito' }).first();
         this.productNameDisplayedInPreCart = page.locator("div.Toastify__toast-body > div > div.iGnvSC > div.llUDMb > p").first();
         this.botonDelPreCarro = page.locator("div.Toastify__toast-body >> text=Ver carrito");
+        this.productInCartPage = page.locator(".bqsZAS");
+        this.elementInCartDescription = page.locator("div.CEnZU");
+        this.endPurchaseButton = page.locator("#endPurchaseCart");
+        this.productNotAvailableWarningMessage = page.locator(".vWmG");
 
     }
 
@@ -139,6 +143,21 @@ class ProductPage{
         console.log("El producto en el pre carro es: " + nombreAGuardar);
         await expect(this.botonDelPreCarro).toBeVisible();
         await this.botonDelPreCarro.click();   
+    }
+
+    async completeOrder(){
+        const elementsInCart = await this.productInCartPage.count();
+        for(let i = 0; i < elementsInCart; i++){
+            let productNameInCart = await this.elementInCartDescription.nth(i).textContent(); 
+            let elementCurated = productNameInCart?.trim();
+            if(await this.productNotAvailableWarningMessage.isVisible()){
+                console.log("El producto: " + elementCurated + "no esta disponible. La compra no puede ser finalizada");
+            } else {
+                await this.endPurchaseButton.click();
+                console.log("Compra finalizada con exito");
+                break;
+            }
+        }
     }
 
 }

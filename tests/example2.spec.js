@@ -10,7 +10,7 @@ const {APIProducts} = require('../utils/APIProducts');
 
 
 for(const data of dataset){
-test(`Verify placing and order - "${data.generalCategory}", "${data.orderByOption[0].label}", "${data.toogleOption[0].label}"`, async ({browser}) => {
+test.only(`Verify placing and order - "${data.generalCategory}", "${data.orderByOption[0].label}", "${data.toogleOption[0].label}"`, async ({browser}) => {
   const context = await browser.newContext(
     {
       permissions : ['geolocation']
@@ -68,17 +68,8 @@ test(`Verify placing and order - "${data.generalCategory}", "${data.orderByOptio
   await productPage.proceedToCartPage();
   await page.waitForURL("**/chk-ui-headless");
   await page.waitForSelector("div.bqsZAS");
-  const elementsInCart = await page.locator("div.bqsZAS").count();
-  console.log("La cantidad de elementos en el carrito es: " + elementsInCart);
-  for(let i = 0; i < elementsInCart; i++){
-    let elementInCartDescription = await page.locator("div.CEnZU").nth(i).textContent();
-    let elementCurated = elementInCartDescription?.trim()
-    if(elementCurated === nameOfArticleSelected){
-      await page.locator("#endPurchaseCart").click();
-      break;
-    }
-  }
-});
+  await productPage.completeOrder();
+  });
 }
 
 /**
@@ -120,7 +111,7 @@ test('Comparar productos API vs UI', async ({ browser }) => {
   console.log("Esto son los precios de la API")
   console.log(uiSalePrices)
   expect(uiSalePrices).toEqual(apiSalePrices);
-  
+
 });
 }
 
