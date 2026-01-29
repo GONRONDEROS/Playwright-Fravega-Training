@@ -10,7 +10,7 @@ const {APIProducts} = require('../utils/APIProducts');
 
 
 for(const data of dataset){
-test.only(`Verify placing and order - "${data.generalCategory}", "${data.orderByOption[0].label}", "${data.toogleOption[0].label}"`, async ({browser}) => {
+test(`Verify placing and order - "${data.generalCategory}", "${data.orderByOption[0].label}", "${data.toogleOption[0].label}"`, async ({browser}) => {
   const context = await browser.newContext(
     {
       permissions : ['geolocation']
@@ -76,7 +76,7 @@ test.only(`Verify placing and order - "${data.generalCategory}", "${data.orderBy
  * @type {Array<{id: string, title: string, listPrice: number|null, salePrice: number|null, discount: number|null}>}
  */ 
 for(const data of dataset){
-test('Comparar productos API vs UI', async ({ browser }) => {
+test(`Comparar productos API vs UI' - "${data.generalCategory}", "${data.orderByOption[0].label}", "${data.toogleOption[0].label}"`, async ({ browser }) => {
   //Obtener datos de la API
   const apiClient = new APIProducts();
   const apiProducts = await apiClient.listProducts();
@@ -111,7 +111,6 @@ test('Comparar productos API vs UI', async ({ browser }) => {
   console.log("Esto son los precios de la API")
   console.log(uiSalePrices)
   expect(uiSalePrices).toEqual(apiSalePrices);
-
 });
 }
 

@@ -12,9 +12,35 @@
                 "value": "FREE_COST"
             }
         ]
+    },
+
+    {
+        "generalCategory" : "Tecnología",
+        "specificCategory": "Celulares",
+        "orderByOption"   : [
+            {   "label": "Mayor precio",
+                "value": "HIGHEST" }
+        ],
+        "toogleOption"    : [
+            {
+                "label": "Envío gratis",
+                "value": "FREE_COST"
+            }
+        ]
+    },
+
+    {
+        "generalCategory" : "Tecnología",
+        "specificCategory": "Celulares",
+        "orderByOption"   : [
+            {   "label": "Menor precio",
+                "value": "LOWEST_SALE_PRICE" }
+        ],
+        "toogleOption"    : [
+            {
+                "label": "Envío gratis",
+                "value": "FREE_COST"
+            }
+        ]
     }
-
-
 ]
-
-

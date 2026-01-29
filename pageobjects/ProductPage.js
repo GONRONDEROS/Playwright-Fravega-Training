@@ -159,22 +159,6 @@ class ProductPage{
             }
         }
     }
-
 }
 
 module.exports = {ProductPage}
-
-
-
-// { "label": "Mayor precio",
-//   "value": "HIGHEST" },
-// { "label": "Mayor descuento",
-//   "value": "DISCOUNT" }
-// {   "label": "Menor precio",
-//     "value": "LOWEST_SALE_PRICE" }
-
-// TV y Audio
-// TV por marca
-
-// "generalCategory" : "Tecnología",
-// "specificCategory": "Celulares",
